@@ -1,0 +1,82 @@
+import React, { useState, useEffect } from 'react';
+import jwt from 'jsonwebtoken';
+import Layout from '../core/Layout';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
+
+// state values
+const Reset = ({ match }) => { // props.match from react router dom
+  const [values, setValues] = useState({
+    name: '',
+    token: '',
+    newPassword: '',
+    buttonText: 'Reset Password'
+  });
+  // grab token from url as soon as mounts
+  useEffect (() => {
+    let token = match.params.token;
+    let {name} = jwt.decode(token);
+    // update state
+    if(token) {
+      setValues({...values, name, token});
+    }
+  }, []);
+
+  // destructure
+  const { name, token, newPassword, buttonText} = values;
+
+  const handleChange = event => {
+    setValues({...values, newPassword: event.target.value});
+  };
+
+  // when user clicks on submit button
+  const clickSubmit = event => {
+    event.preventDefault();
+    // change button text to Submitting
+    setValues({...values, buttonText: 'Submitting'});
+    // send email to /forgot-password
+    axios({
+      method: 'PUT',
+      url: `${process.env.REACT_APP_API}/reset-password`,
+      data: { newPassword, resetPasswordLink: token }
+    })
+    // get response
+    .then(response => {
+      console.log('RESET PASSWORD SUCCESS', response);
+      toast.success(response.data.message);
+      setValues({...values, buttonText: 'Done'});
+    })
+    .catch(error => {
+      console.log('RESET PASSWORD ERROR', error.response.data)
+      toast.error(error.response.data.error);
+      setValues({...values, buttonText: 'Reset Password'});
+    });
+  };
+
+  // form
+  const passwordResetForm = () => (
+    <form>
+      <div className="form-group">
+        <label className="text-muted">Password</label>
+        <input onChange={handleChange} value={newPassword} type="password" className="form-control" placeholder="Type new password" required />
+      </div>
+
+      <div>
+        <button className="btn btn-primary" onClick={clickSubmit}>{buttonText}</button>
+      </div>
+    </form>
+  );
+
+  return (
+    <Layout>
+      <div className="col-md-6 offset-md-3">
+        <ToastContainer />
+        <h1 className="p-5 text-center">Hello {name}! Please type your new password</h1>
+        {passwordResetForm()}
+      </div>
+    </Layout>
+  );
+};
+
+export default Reset;
