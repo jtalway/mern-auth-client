@@ -13,6 +13,12 @@ const App = () => {
           reset password, login with facebook and google as well as private and protected
           routes for authenticated user and users with the role of admin.
         </p>
+        <hr />
+        <h6>GitHub links</h6>
+        <p>
+        <a className="nav-link" href="https://github.com/jtalway/mern-auth-client">Client</a>
+        <a className="nav-link" href="https://github.com/jtalway/mern-auth-api">API</a>
+        </p>
       </div>
     </Layout>
   );
